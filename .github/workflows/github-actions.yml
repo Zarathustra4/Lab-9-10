@@ -29,6 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: python:3.10-slim
+    needs: lint
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -55,6 +56,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: python:3.10-slim
+    needs: test
     if: github.ref == 'refs/heads/master'
     steps:
       - name: Checkout code
