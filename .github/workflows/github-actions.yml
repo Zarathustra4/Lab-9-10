@@ -1,0 +1,69 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    container:
+      image: python:3.10-slim
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.10'
+
+      - name: Install pylint
+        run: pip install pylint
+
+      - name: Run lint
+        run: pylint main.py
+
+  test:
+    runs-on: ubuntu-latest
+    container:
+      image: python:3.10-slim
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.10'
+
+      - name: Install pytest and pytest-cov
+        run: pip install pytest pytest-cov
+
+      - name: Run tests
+        run: pytest --cov=main --cov-report=xml --cov-fail-under=50 --junitxml=junit.xml
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: junit-test-results
+          path: junit.xml
+
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: python:3.10-slim
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
